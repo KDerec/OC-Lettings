@@ -20,9 +20,7 @@ jobs:
 
       - run:
             name: run linter
-            command: |
-              mkdir -p test-results/flake8
-              flake8 . --output-file=test-results/flake8/flake8.txt
+            command: flake8
       - run:
           name: run tests
           command: |
