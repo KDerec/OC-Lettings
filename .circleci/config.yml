@@ -20,7 +20,10 @@ jobs:
 
       - run:
             name: run linter
-            command: flake8
+            command: |
+              . venv/bin/activate
+              mkdir -p test-results/flake8
+              flake8 . --output-file=flake8.txt test-results/flake8/
       - run:
           name: run tests
           command: |
