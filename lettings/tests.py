@@ -2,104 +2,68 @@ import pytest
 from django.test import Client
 from django.urls import reverse, resolve
 from pytest_django.asserts import assertTemplateUsed
-from lettings.models import Address, Letting
+from lettings.models import Letting
 
 
 @pytest.mark.django_db
-def test_address_model():
-    address = Address.objects.create(
-        number=1600,
-        street="Pennsylvania Avenue NW",
-        city="Washington",
-        state="DC",
-        zip_code=20500,
-        country_iso_code="USA",
-    )
+def test_address_model(test_address):
+    address = test_address
     expected_value = "1600 Pennsylvania Avenue NW"
 
     assert str(address) == expected_value
 
 
 @pytest.mark.django_db
-def test_letting_model():
-    address = Address.objects.create(
-        number=1600,
-        street="Pennsylvania Avenue NW",
-        city="Washington",
-        state="DC",
-        zip_code=20500,
-        country_iso_code="USA",
-    )
+def test_letting_model(test_address):
+    address = test_address
     letting = Letting.objects.create(title="White House", address=address)
     expected_value = "White House"
 
     assert str(letting) == expected_value
 
 
-def test_lettings_index_url():
-    path = reverse("lettings_index")
-
-    assert path == "/lettings/"
-    assert resolve(path).view_name == "lettings_index"
+def test_lettings_index_url(reverse_paths):
+    assert reverse_paths["lettings"] == "/lettings/"
+    assert resolve(reverse_paths["lettings"]).view_name == "lettings_index"
 
 
 @pytest.mark.django_db
-def test_letting_url():
-    address = Address.objects.create(
-        number=1600,
-        street="Pennsylvania Avenue NW",
-        city="Washington",
-        state="DC",
-        zip_code=20500,
-        country_iso_code="USA",
-    )
+def test_letting_url(test_address):
+    address = test_address
     letting = Letting.objects.create(title="White House", address=address)
     path = reverse("letting", args=[letting.id])
 
-    assert path == f"/lettings/{letting.id}/"
+    assert path == f"/lettings/1/"
     assert resolve(path).view_name == "letting"
 
 
 @pytest.mark.django_db
-def test_lettings_index_view():
+def test_lettings_index_view(reverse_paths):
     client = Client()
-    path = reverse("lettings_index")
-    home_path = reverse("index")
-    profiles_path = reverse("profiles_index")
-    response = client.get(path)
+    response = client.get(reverse_paths["lettings"])
     content = response.content.decode()
     expected_title = "<title>Lettings</title>"
 
     assert response.status_code == 200
     assert expected_title in content
-    assert home_path in content
-    assert profiles_path in content
+    assert reverse_paths["home"] in content
+    assert reverse_paths["profiles"] in content
     assertTemplateUsed(response, "lettings/index.html")
 
 
 @pytest.mark.django_db
-def test_letting_view():
+def test_letting_view(test_address, reverse_paths):
     client = Client()
-    address = Address.objects.create(
-        number=1600,
-        street="Pennsylvania Avenue NW",
-        city="Washington",
-        state="DC",
-        zip_code=20500,
-        country_iso_code="USA",
-    )
+    address = test_address
     letting = Letting.objects.create(title="White House", address=address)
     path = reverse("letting", args=[letting.id])
-    home_path = reverse("index")
-    profiles_path = reverse("profiles_index")
-    lettings_path = reverse("lettings_index")
     response = client.get(path)
     content = response.content.decode()
     expected_title = "<title>White House</title>"
 
     assert response.status_code == 200
     assert expected_title in content
-    assert home_path in content
-    assert profiles_path in content
-    assert lettings_path in content
+    assert reverse_paths["home"] in content
+    assert reverse_paths["lettings"] in content
+    assert reverse_paths["profiles"] in content
     assertTemplateUsed(response, "lettings/letting.html")

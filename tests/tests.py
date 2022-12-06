@@ -3,10 +3,9 @@ from django.urls import reverse, resolve
 from pytest_django.asserts import assertTemplateUsed
 
 
-def test_index_url():
-    path = reverse("index")
-    assert path == "/"
-    assert resolve(path).view_name == "index"
+def test_index_url(reverse_paths):
+    assert reverse_paths["home"] == "/"
+    assert resolve(reverse_paths["home"]).view_name == "index"
 
 
 def test_index_view():

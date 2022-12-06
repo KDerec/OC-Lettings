@@ -1,35 +1,31 @@
 import pytest
 from django.test import Client
 from django.urls import reverse, resolve
-from django.contrib.auth.models import User
 from pytest_django.asserts import assertTemplateUsed
 from profiles.models import Profile
 
 
 @pytest.mark.django_db
-def test_profile_model():
-    user = User.objects.create_user(username="TestUser", password="testpassword")
+def test_profile_model(test_user):
+    user = test_user
     profile = Profile.objects.create(
-        user = user,
+        user=user,
     )
     expected_value = "TestUser"
 
     assert str(profile) == expected_value
 
 
-
-def test_profiles_index_url():
-    path = reverse("profiles_index")
-
-    assert path == "/profiles/"
-    assert resolve(path).view_name == "profiles_index"
+def test_profiles_index_url(reverse_paths):
+    assert reverse_paths["profiles"] == "/profiles/"
+    assert resolve(reverse_paths["profiles"]).view_name == "profiles_index"
 
 
 @pytest.mark.django_db
-def test_profile_url():
-    user = User.objects.create_user(username="TestUser", password="testpassword")
+def test_profile_url(test_user):
+    user = test_user
     profile = Profile.objects.create(
-        user = user,
+        user=user,
     )
     path = reverse("profile", args=[profile.user.username])
 
@@ -38,40 +34,34 @@ def test_profile_url():
 
 
 @pytest.mark.django_db
-def test_profiles_index_view():
+def test_profiles_index_view(reverse_paths):
     client = Client()
-    path = reverse("profiles_index")
-    home_path = reverse("index")
-    lettings_path = reverse("lettings_index")
-    response = client.get(path)
+    response = client.get(reverse_paths["profiles"])
     content = response.content.decode()
     expected_title = "<title>Profiles</title>"
 
     assert response.status_code == 200
     assert expected_title in content
-    assert home_path in content
-    assert lettings_path in content
+    assert reverse_paths["home"] in content
+    assert reverse_paths["lettings"] in content
     assertTemplateUsed(response, "profiles/index.html")
 
 
 @pytest.mark.django_db
-def test_profile_view():
+def test_profile_view(test_user, reverse_paths):
     client = Client()
-    user = User.objects.create_user(username="TestUser", password="testpassword")
+    user = test_user
     profile = Profile.objects.create(
-        user = user,
+        user=user,
     )
     path = reverse("profile", args=[profile.user.username])
-    home_path = reverse("index")
-    profiles_path = reverse("profiles_index")
-    lettings_path = reverse("lettings_index")
     response = client.get(path)
     content = response.content.decode()
     expected_title = f"<title>{profile.user.username}</title>"
 
     assert response.status_code == 200
     assert expected_title in content
-    assert home_path in content
-    assert profiles_path in content
-    assert lettings_path in content
+    assert reverse_paths["home"] in content
+    assert reverse_paths["lettings"] in content
+    assert reverse_paths["profiles"] in content
     assertTemplateUsed(response, "profiles/profile.html")
