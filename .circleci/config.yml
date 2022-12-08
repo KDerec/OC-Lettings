@@ -59,4 +59,9 @@ workflows:
   main-workflow:
     jobs:
       - build-lint-and-test
-      - build-and-push-to-dockerhub
+      - build-and-push-to-dockerhub:
+          requires:
+            - build-lint-and-test
+          filters:
+            branches:
+              only: master 
