@@ -59,7 +59,7 @@ jobs:
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
             docker push $DOCKER_USER/oc-lettings:$TAG
 
-  build-and-deploy-to-heroku:
+  deploy-to-heroku:
     docker:
       - image: cimg/python:3.9.6
     
@@ -67,11 +67,12 @@ jobs:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - run: docker build .
-      - heroku/install
-      - run: heroku container:login
-      - heroku/push-docker-image
-      - heroku/release-docker-image
+      - run:
+          command: |
+            sudo curl https://cli-assets.heroku.com/install.sh | sh
+            HEROKU_API_KEY=${HEROKU_API_KEY} heroku container:login
+            HEROKU_API_KEY=${HEROKU_API_KEY} heroku container:push -a $HEROKU_APP_NAME web
+            HEROKU_API_KEY=${HEROKU_API_KEY} heroku container:release -a $HEROKU_APP_NAME web
 
 
 workflows:
@@ -84,7 +85,7 @@ workflows:
           filters:
             branches:
               only: master
-      - build-and-deploy-to-heroku:
+      - deploy-to-heroku:
           requires:
             - build-and-push-to-dockerhub
           filters:
