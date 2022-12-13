@@ -1,5 +1,7 @@
 import os
+import sentry_sdk
 from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -148,3 +150,15 @@ if IS_HEROKU:
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
+
+try:
+    sentry_sdk.init(
+        dsn=os.environ["SENTRY_DSN"],
+        integrations=[
+            DjangoIntegration(),
+        ],
+        traces_sample_rate=1.0,
+        send_default_pii=True,
+    )
+except KeyError:
+    print("Sentry isn't running, because no 'SENTRY_DSN' was found in env variables.")
