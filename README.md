@@ -193,7 +193,7 @@ pytest
 
 ## Deployment
 
-The application is deployed on **Heroku** using **CircleCi** pipeline and **Docker** container.  
+The application is deployed on **Heroku** using **CircleCi** pipeline, **Docker** container and **Sentry** for monitoring and error tracking.  
 
 ### How it's works ?
 When a developer executes a `git push` command to the `master` branch of the project, it's run a pipeline on **CircleCi** and this pipeline run a set of processess consisting of **building** and **testing** stage before **deployment**.  
@@ -220,6 +220,7 @@ Changes to other branches will only trigger testing and linting.
 * Accept to login to [CircleCI](https://circleci.com/) with your GitHub account
 * [Heroku](https://www.heroku.com/) Account
 * [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) installed
+* [Sentry](https://sentry.io/) Account
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -237,13 +238,14 @@ Changes to other branches will only trigger testing and linting.
    ```sh
    heroku auth:token
    ```
-7. Login to **CircleCI** with your **GitHub** account ;
-8. Set up your project by selecting your `OC-Lettings` repository and the `config.yml` file from `master` branch ;  
-  <a href="https://github.com/KDerec/OC-Lettings/blob/master/images/set_up_project_circleci.jpg"><img src="images/set_up_project_circleci.jpg" alt="set-up-project-from-circleci-webpage" width="25%" height="25%"></a>
-1. You will see your project and it's status will be `Failed`, but it's **normal**, because we haven't configured the project yet ;  
-2. To do that, go to `Project Settings` ;  
-  <a href="https://github.com/KDerec/OC-Lettings/blob/master/images/project_setting_circleci.jpg"><img src="images/project_setting_circleci.jpg" alt="project-settings-from-circleci-webpage" width="40%" height="40%"></a>
-1.  Add environment variables below ;  
+7. Connected to **Sentry**, [create a new projet](https://docs.sentry.io/product/sentry-basics/integrate-frontend/create-new-project/) and retrieve your [DSN key](https://docs.sentry.io/product/sentry-basics/dsn-explainer/) ;
+8. Login to **CircleCI** with your **GitHub** account ;
+9. Set up your project by selecting your `OC-Lettings` repository and the `config.yml` file from `master` branch ;  
+  <a href="https://github.com/KDerec/OC-Lettings/blob/master/images/set_up_project_circleci.jpg"><img src="images/set_up_project_circleci.jpg" alt="set-up-project-from-circleci-webpage" width="50%" height="50%"></a>
+10. You will see your project and it's status will be `Failed`, but it's **normal**, because we haven't configured the project yet ;  
+11. To do that, go to `Project Settings` ;  
+  <a href="https://github.com/KDerec/OC-Lettings/blob/master/images/project_setting_circleci.jpg"><img src="images/project_setting_circleci.jpg" alt="project-settings-from-circleci-webpage" width="50%" height="50%"></a>
+12.  Add environment variables below ;  
 
   | Name            | Value                                                               |
   |-----------------|---------------------------------------------------------------------|
@@ -251,10 +253,12 @@ Changes to other branches will only trigger testing and linting.
   | DOCKER_USER     | Your docker username account                                        |
   | HEROKU_API_KEY  | The token you generated before with the `heroku auth:token` command |
   | HEROKU_APP_NAME | The name of the app you created in Heroku                           |
+  | SECRET_KEY      | Your Django secret key                                              |
+  | SENTRY_DSN      | Your DSN key from Sentry                            |
 
-  <a href="https://github.com/KDerec/OC-Lettings/blob/master/images/env_var_circleci.jpg"><img src="images/env_var_circleci.jpg" alt="environement-variable-from-circleci-webpage" width="35%" height="35%"></a>  
-12. Go back to the [pipelines of the project](https://app.circleci.com/pipelines), rerun the workflow and wait until `Success` ;  
-13. Go to heroku dashboard, open your app and congratulation, it's **deploy** ! 🎉
+  <a href="https://github.com/KDerec/OC-Lettings/blob/master/images/env_var_circleci.jpg"><img src="images/env_var_circleci.jpg" alt="environement-variable-from-circleci-webpage" width="50%" height="50%"></a>  
+13.  Go back to the [pipelines of the project](https://app.circleci.com/pipelines), rerun the workflow and wait until `Success` ;  
+14.  Go to heroku dashboard, open your app and congratulation, it's **deploy** ! 🎉
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
